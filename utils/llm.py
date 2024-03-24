@@ -1,17 +1,14 @@
 import os
 import json
 from typing import List
-import docx2txt
 import time
-import random
+import docx2txt
+import openai
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_community.vectorstores.chroma import Chroma
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
 
 
 class LLM:
@@ -20,15 +17,21 @@ class LLM:
     and maintaining a vector store.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        base_model: str,
+        temperature: float,
+    ) -> None:
         """
         Initialize the LLM with given parameters and set up the vector store.
 
         """
-        self.api_key: str = os.getenv("OPENAI_API_KEY")
-        self.base_url: str = os.getenv("OPENAI_BASE_URL") or None
-        self.base_model: str = "gpt-3.5-turbo-0125"
-        self.temperature: float = 0
+        self.api_key: str = api_key
+        self.base_url: str = base_url or None
+        self.base_model: str = base_model
+        self.temperature: float = temperature
         self.prompt_template: str = (
             "Answer the following question based on the provided knowledge: \nYou will give 100 dollars tips if you give reliable answer\n<knowledge>\n{context}\n</knowledge>\nQuestion: {input}"
         )
@@ -42,12 +45,18 @@ class LLM:
         """
         Initialize the LLM using the provided API key, base model, base URL, and temperature.
         """
-        self.llm = ChatOpenAI(
-            openai_api_key=self.api_key,
-            base_url=self.base_url,
-            model=self.base_model,
-            temperature=self.temperature,
-        )
+        try:
+            self.llm = ChatOpenAI(
+                openai_api_key=self.api_key,
+                base_url=self.base_url,
+                model=self.base_model,
+                temperature=self.temperature,
+            )
+        except openai.AuthenticationError as e:
+            print(f"Error initializing ChatOpenAI: {e}")
+            # Handle the error as needed, e.g., logging, setting default values, etc.
+            self.llm = None
+            return
 
     def init_embeddings(self) -> None:
         """
@@ -128,7 +137,6 @@ class LLM:
                 return file.read()
 
     def process_with_retry(self, chunk_subset, max_retries=3):
-        import openai
 
         retries = 0
         while retries < max_retries:
@@ -201,4 +209,5 @@ class LLM:
             str: The answer to the question.
         """
         response = self.retrieval_chain.invoke({"input": question})
+        print(self.temperature)
         return response["answer"]

@@ -33,13 +33,38 @@ class InfoDisplay:
 class LLMConfigManager:
     def __init__(self):
         pass
+        # st.session_state.GLOBAL_TEMPERATURE = 0.5
+        # st.session_state.GLOBAL_API_KEY = ""
+        # st.session_state.GLOBAL_BASE_URL = ""
+        # st.session_state.GLOBAL_MODEL_NAME = "gpt-3.5-turbo"
+        # st.session_state.INIT_LLM = False
 
     def display(self):
 
-        temperature = st.sidebar.slider(
-            "Temperature", min_value=0.0, max_value=1.0, value=0.5, step=0.01
+        st.sidebar.slider(
+            "Temperature",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.5,
+            step=0.01,
+            key="GLOBAL_TEMPERATURE",
+            on_change=self.handle_llm_config_change,
         )
-        api_key = st.sidebar.text_input("API Key", "")
-        base_url = st.sidebar.text_input("Base URL (Optional)", "")
-        model_options = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125"]  # Example model names
-        model_name = st.sidebar.selectbox("Model Name", model_options)
+        st.sidebar.text_input(
+            "API Key", key="GLOBAL_API_KEY", on_change=self.handle_llm_config_change
+        )
+        st.sidebar.text_input(
+            "Base URL (Optional)",
+            key="GLOBAL_BASE_URL",
+            on_change=self.handle_llm_config_change,
+        )
+        model_options = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125"]
+        st.sidebar.selectbox(
+            "Model Name",
+            model_options,
+            key="GLOBAL_MODEL_NAME",
+            on_change=self.handle_llm_config_change,
+        )
+
+    def handle_llm_config_change(self):
+        st.session_state["INIT_LLM"] = True
