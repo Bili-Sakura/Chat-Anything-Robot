@@ -1,6 +1,6 @@
+import asyncio
 import streamlit as st
 from utils import LLM
-import asyncio
 
 
 class ChatWindow:
