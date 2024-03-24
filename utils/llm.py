@@ -209,5 +209,4 @@ class LLM:
             str: The answer to the question.
         """
         response = self.retrieval_chain.invoke({"input": question})
-        print(self.temperature)
         return response["answer"]

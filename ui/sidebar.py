@@ -51,7 +51,10 @@ class LLMConfigManager:
             on_change=self.handle_llm_config_change,
         )
         st.sidebar.text_input(
-            "API Key", key="GLOBAL_API_KEY", on_change=self.handle_llm_config_change
+            "API Key",
+            key="GLOBAL_API_KEY",
+            on_change=self.handle_llm_config_change,
+            type="password",
         )
         st.sidebar.text_input(
             "Base URL (Optional)",

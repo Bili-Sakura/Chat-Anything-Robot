@@ -1,5 +1,6 @@
 import streamlit as st
 from utils import LLM
+import asyncio
 
 
 class ChatWindow:
@@ -16,10 +17,20 @@ class ChatWindow:
     def display(self):
         if st.session_state.get("INIT_LLM"):
             self.update_llm_instance()
-            # st.session_state["INIT_LLM"] = False  # Reset the flag
 
         self.display_chat_window()
         self.display_user_input_box()
+
+        # Check if there's new user input to be processed
+        if "new_user_input" in st.session_state and st.session_state["new_user_input"]:
+            # Start a background task to handle async model response
+            if "async_task_done" not in st.session_state:
+
+                asyncio.run(self.handle_send(st.session_state["new_user_input"]))
+            else:
+                # Once the async task is done, clear the flags
+                del st.session_state["new_user_input"]
+                del st.session_state["async_task_done"]
 
     def display_chat_window(self):
         chat_container = st.empty()
@@ -34,13 +45,16 @@ class ChatWindow:
 
     def handle_input(self, user_input_key):
         user_input = st.session_state[user_input_key]
-        if user_input and self.llm:
-            self.handle_send(user_input)
+        if user_input:
+            # Set a flag in session_state to indicate new user input
+            st.session_state["new_user_input"] = user_input
+
+        # Reset the user input field
         st.session_state[user_input_key] = ""
 
     def display_user_input_box(self):
         user_input_key = "user_input_key"
-        user_input = st.text_input(
+        st.text_input(
             label="Type your message here...",
             key=user_input_key,
             on_change=self.handle_input,
@@ -49,12 +63,16 @@ class ChatWindow:
             disabled=not self.llm,  # Disable input if llm is not configured properly
         )
 
-    def handle_send(self, user_input):
+    async def handle_send(self, user_input):
         if user_input:
             st.session_state.conversation.append(("User", user_input))
             if self.llm:
-                model_reply = self.llm.get_answer(user_input)
+                model_reply = await self.llm.get_answer_async(user_input)
                 st.session_state.conversation.append(("Model", model_reply))
+                # Indicate the async task is done
+                st.session_state["async_task_done"] = True
+                # Trigger a rerun to refresh the UI
+                st.rerun()
 
     def update_llm_instance(self):
 
