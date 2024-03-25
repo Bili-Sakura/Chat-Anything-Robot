@@ -1,6 +1,6 @@
 # self
-data
-database
+data/*
+database/*
 .vscode
 
 # Byte-compiled / optimized / DLL files
