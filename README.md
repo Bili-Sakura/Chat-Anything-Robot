@@ -95,5 +95,16 @@ Re-init the program, the corpus will be added into vectorstore automatically (ma
 
 ## Development Notes
 
-1. add button for vercterization
-2. add cost log info 
+### Feature
+
+- [ ] Add button for vercterization
+- [ ] Add cost log info locally
+- [ ] Add knowledge info in sidebar
+
+### Fix
+
+- [x] Asynchronously chat
+
+### Refactor
+
+- [x] Web Application Project Structure
