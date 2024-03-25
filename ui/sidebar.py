@@ -1,5 +1,9 @@
 # sidebar.py
 import streamlit as st
+from dotenv import load_dotenv
+import os
+
+load_dotenv(override=True)
 
 
 class SidebarManager:
@@ -52,6 +56,7 @@ class LLMConfigManager:
         )
         st.sidebar.text_input(
             "API Key",
+            value=os.getenv("OPENAI_API_KEY") or "",
             key="GLOBAL_API_KEY",
             on_change=self.handle_llm_config_change,
             type="password",

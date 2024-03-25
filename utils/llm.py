@@ -198,6 +198,18 @@ class LLM:
         response = await self.retrieval_chain.ainvoke({"input": question})
         return response["answer"]
 
+    async def get_streaming_answer_async(self, question: str):
+        """
+        Asynchronously retrieve multiple answers for a given question using the retrieval chain.
+        """
+        responses = []
+        async for output in self.retrieval_chain.astream({"input": question}):
+            if output.get("answer", None):
+                responses.append(output.get("answer", ""))
+                print("response:", responses[-1])  # Print the latest response
+        return responses
+        # return self.retrieval_chain.astream({"input": question})
+
     def get_answer(self, question: str) -> str:
         """
         Retrieve an answer for a given question using the retrieval chain.
